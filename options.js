@@ -53,7 +53,7 @@ async function saveSettings() {
     defaultPath: defaultPath
   });
 
-  showStatus('✅ Settings saved successfully!', 'success');
+  showStatus('Settings saved successfully!', 'success');
 }
 
 // Extract page ID from URL or clean up format
@@ -92,13 +92,13 @@ async function testConnection() {
     if (response.ok) {
       const data = await response.json();
       const pageTitle = data.properties?.title?.title?.[0]?.plain_text || 'Untitled';
-      showStatus(`✅ Connected! Root page: "${pageTitle}"`, 'success');
+      showStatus(`Connected! Root page: "${pageTitle}"`, 'success');
     } else {
       const error = await response.json();
-      showStatus(`❌ ${error.message || 'Connection failed'}`, 'error');
+      showStatus(error.message || 'Connection failed', 'error');
     }
   } catch (error) {
-    showStatus(`❌ ${error.message}`, 'error');
+    showStatus(error.message, 'error');
   }
 }
 

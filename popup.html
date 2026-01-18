@@ -11,7 +11,7 @@
 <body>
   <div class="container">
     <header>
-      <h1>📋 Notion Clipper</h1>
+      <h1>Notion Clipper</h1>
     </header>
 
     <div class="content-preview" id="preview">
@@ -21,10 +21,13 @@
     <div class="form-group">
       <label for="path">Save to path:</label>
       <div class="path-input-row">
-        <input type="text" id="path" placeholder="e.g., Projects/Notes/Today">
+        <div class="path-input-wrapper">
+          <div class="path-highlight" id="pathHighlight"></div>
+          <input type="text" id="path" placeholder="e.g., Projects/Notes/#today">
+        </div>
         <button id="clearPathBtn" class="clear-btn" title="Reset to default path">✕</button>
       </div>
-      <p class="hint">Leave empty for: <span id="defaultPath"></span></p>
+      <p class="hint">Leave empty for: <br><span id="defaultPath"></span></p>
     </div>
 
     <div class="form-group checkbox-group">
@@ -42,7 +45,12 @@
     <div id="status" class="status"></div>
 
     <footer>
-      <a href="#" id="openOptions">⚙️ Settings</a>
+      <a href="#" id="openOptions"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg> Settings</a>
     </footer>
   </div>
 

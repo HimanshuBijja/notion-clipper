@@ -19,7 +19,7 @@ Select any text on a webpage, right-click, and instantly save it to your Notion 
 • **One-Click Save** - Right-click any selected text → Save to Notion
 • **Custom Paths** - Organize clips into pages like "Work/Research/AI"
 • **Auto-Create Pages** - Missing pages are created automatically
-• **Smart Defaults** - Saves to Notion-Extension/Year/Month/Day if no path set
+• **Smart Defaults** - Saves to Inbox/Year/Month/Day if no path set
 • **Preserves Formatting** - Line breaks and structure stay intact
 • **Source Tracking** - Each clip includes the source URL and timestamp
 

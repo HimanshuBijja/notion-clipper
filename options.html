@@ -10,14 +10,11 @@
 
 <body>
     <div class="container">
-        <header>
-            <h1>⚙️ Notion Clipper Settings</h1>
-            <p class="subtitle">Configure your Notion integration</p>
-        </header>
+
 
         <main>
             <div class="card">
-                <h2>🔑 API Configuration</h2>
+                <h2>API Configuration</h2>
 
                 <div class="form-group">
                     <label for="token">Notion Integration Token</label>
@@ -39,13 +36,13 @@
             </div>
 
             <div class="card">
-                <h2>📁 Default Settings</h2>
+                <h2>Default Settings</h2>
 
                 <div class="form-group">
                     <label for="defaultPath">Default Save Path (optional)</label>
                     <input type="text" id="defaultPath" placeholder="e.g., Clips/General">
                     <p class="hint">
-                        If empty, clips will be saved to: Notion-Extension/Year/Month/Day
+                        If empty, clips will be saved to: Inbox/Year/Month/Day
                     </p>
                 </div>
             </div>
@@ -58,9 +55,7 @@
             <div id="status" class="status"></div>
         </main>
 
-        <footer>
-            <p>Made for personal use 🚀</p>
-        </footer>
+
     </div>
 
     <script src="options.js"></script>

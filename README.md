@@ -7,7 +7,7 @@ Save selected text from any webpage directly to Notion with a single right-click
 - **Right-click to save** - Select text → Right-click → Save to Notion
 - **Custom paths** - Organize clips into hierarchical pages (e.g., `Projects/Notes/Ideas`)
 - **Auto-create pages** - Missing pages in the path are created automatically
-- **Smart defaults** - No path? Saves to `Notion-Extension/Year/Month/Day`
+- **Smart defaults** - No path? Saves to `Inbox/Year/Month/Day`
 - **Preserves formatting** - Line breaks and text structure stay intact
 
 ## 🚀 Quick Start
@@ -63,7 +63,7 @@ Save selected text from any webpage directly to Notion with a single right-click
 
 | Path You Enter | Where It Saves |
 |----------------|----------------|
-| *(empty)* | `Notion-Extension/2026/January/18` |
+| *(empty)* | `Inbox/2026/January/18` |
 | `Notes` | `Notes` page under your root |
 | `Work/Projects/Ideas` | Creates `Work` → `Projects` → `Ideas` |
 
