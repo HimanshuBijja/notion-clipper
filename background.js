@@ -105,40 +105,40 @@ function htmlToNotionBlocks(html, plainText) {
     return createTextBlocks(plainText);
   }
 
+  // Just treat everything as text/paragraphs, preserving structure as much as possible
+  // We use the plainText fallback logic derived from HTML to preserve line breaks better
+  // or we can just process paragraphs. 
+  
+  // The user wants to "remove the code blocks text formating... remove that entirely"
+  // and "format code according to the copied lines".
+  
+  // Let's rely on standard paragraph detection but WITHOUT special code block handling.
+  
   const blocks = [];
   
-  // Clean up HTML - normalize line breaks
+  // Clean up HTML
   let content = html
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n');
+    
+  // We will still detect lists and headings as those are useful structure, 
+  // but strictly treat pre/code as regular text paragraphs.
   
-  // Split content into processable chunks by finding block-level elements
-  // Use markers to track positions and types
+  // Markers for blocks we WANT to preserve structure for
   const elements = [];
   
-  // Find all block-level elements with their positions
-  // Order matters - check more specific patterns first
   const patterns = [
-    // Code blocks - various patterns used by different sites
-    { regex: /<pre[^>]*><code[^>]*(?:class="[^"]*language-(\w+)[^"]*")?[^>]*>([\s\S]*?)<\/code><\/pre>/gi, type: 'code' },
-    { regex: /<pre[^>]*>[\s\S]*?<code[^>]*(?:class="[^"]*language-(\w+)[^"]*")?[^>]*>([\s\S]*?)<\/code>[\s\S]*?<\/pre>/gi, type: 'code' },
-    { regex: /<pre[^>]*(?:class="[^"]*language-(\w+)[^"]*")?[^>]*>([\s\S]*?)<\/pre>/gi, type: 'pre' },
-    { regex: /<figure[^>]*>[\s\S]*?<pre[^>]*>([\s\S]*?)<\/pre>[\s\S]*?<\/figure>/gi, type: 'figure-code' },
-    // Medium-specific code blocks (uses classes like graf--code, code-block)
-    { regex: /<pre[^>]*class="[^"]*(?:graf--code|code-block|highlight)[^"]*"[^>]*>([\s\S]*?)<\/pre>/gi, type: 'medium-code' },
-    { regex: /<div[^>]*class="[^"]*(?:code-block|highlight|prism)[^"]*"[^>]*>([\s\S]*?)<\/div>/gi, type: 'div-code' },
-    // Headings
     { regex: /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi, type: 'heading' },
-    // Other block elements
     { regex: /<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, type: 'quote' },
     { regex: /<ul[^>]*>([\s\S]*?)<\/ul>/gi, type: 'ul' },
     { regex: /<ol[^>]*>([\s\S]*?)<\/ol>/gi, type: 'ol' },
     { regex: /<p[^>]*>([\s\S]*?)<\/p>/gi, type: 'p' },
     { regex: /<div[^>]*>([\s\S]*?)<\/div>/gi, type: 'div' },
-    { regex: /<li[^>]*>([\s\S]*?)<\/li>/gi, type: 'li' }
+    { regex: /<li[^>]*>([\s\S]*?)<\/li>/gi, type: 'li' },
+    // Treat pre as just text container, but capture it to preserve it
+    { regex: /<pre[^>]*>([\s\S]*?)<\/pre>/gi, type: 'p' } 
   ];
   
-  // Find all matches with their positions
   for (const pattern of patterns) {
     let match;
     const regex = new RegExp(pattern.regex.source, pattern.regex.flags);
@@ -152,84 +152,20 @@ function htmlToNotionBlocks(html, plainText) {
     }
   }
   
-  // Sort by position to maintain document order
   elements.sort((a, b) => a.start - b.start);
   
-  // Remove overlapping elements (keep the outermost)
   const filtered = [];
   for (const el of elements) {
-    // Check if this element is inside a previously added element
     const isNested = filtered.some(prev => el.start >= prev.start && el.end <= prev.end);
     if (!isNested) {
       filtered.push(el);
     }
   }
   
-  // Process elements in order
   for (const el of filtered) {
     const match = el.match;
     
     switch (el.type) {
-      case 'code':
-        const cleanCode = decodeHtmlEntities(match[2].replace(/<[^>]+>/g, ''));
-        if (cleanCode.trim()) {
-          blocks.push({
-            object: 'block',
-            type: 'code',
-            code: {
-              rich_text: [{ type: 'text', text: { content: cleanCode.slice(0, 2000) } }],
-              language: match[1] || 'plain text'
-            }
-          });
-        }
-        break;
-      
-      case 'pre':
-        // Standalone <pre> without <code>
-        const preCode = decodeHtmlEntities(match[2].replace(/<[^>]+>/g, ''));
-        if (preCode.trim()) {
-          blocks.push({
-            object: 'block',
-            type: 'code',
-            code: {
-              rich_text: [{ type: 'text', text: { content: preCode.slice(0, 2000) } }],
-              language: match[1] || 'plain text'
-            }
-          });
-        }
-        break;
-        
-      case 'figure-code':
-        // <figure> wrapped code (common in Medium)
-        const figureCode = decodeHtmlEntities(match[1].replace(/<[^>]+>/g, ''));
-        if (figureCode.trim()) {
-          blocks.push({
-            object: 'block',
-            type: 'code',
-            code: {
-              rich_text: [{ type: 'text', text: { content: figureCode.slice(0, 2000) } }],
-              language: 'plain text'
-            }
-          });
-        }
-        break;
-      
-      case 'medium-code':
-      case 'div-code':
-        // Medium and other class-based code blocks
-        const classCode = decodeHtmlEntities(match[1].replace(/<[^>]+>/g, ''));
-        if (classCode.trim()) {
-          blocks.push({
-            object: 'block',
-            type: 'code',
-            code: {
-              rich_text: [{ type: 'text', text: { content: classCode.slice(0, 2000) } }],
-              language: 'plain text'
-            }
-          });
-        }
-        break;
-        
       case 'heading':
         const headingText = stripHtml(match[2]);
         if (headingText.trim()) {
@@ -277,7 +213,6 @@ function htmlToNotionBlocks(html, plainText) {
         break;
         
       case 'li':
-        // Standalone list items (not in ul/ol)
         const liText = stripHtml(match[1]);
         if (liText.trim()) {
           blocks.push({
@@ -290,35 +225,20 @@ function htmlToNotionBlocks(html, plainText) {
         
       case 'p':
       case 'div':
-        const pHtml = match[1];
-        const pText = stripHtml(pHtml);
+        // For paragraphs, we want to respect line breaks from the source more faithfully
+        // if the user wants "according to copied lines".
+        const pText = stripHtml(match[1]);
         if (pText.trim()) {
-          // Check if this paragraph contains mostly code (has <code> tags or looks like code)
-          const hasCodeTag = /<code[^>]*>/i.test(pHtml);
-          const looksLikeCode = /^[\s]*(?:\/\/|\/\*|{|\[|const |let |var |function |import |export |class |if\s*\(|for\s*\(|while\s*\(|return |=>|<\w+|<\/\w+)/.test(pText);
-          
-          if (hasCodeTag || looksLikeCode) {
-            blocks.push({
-              object: 'block',
-              type: 'code',
-              code: {
-                rich_text: [{ type: 'text', text: { content: pText.slice(0, 2000) } }],
-                language: 'javascript'
-              }
-            });
-          } else {
-            blocks.push({
-              object: 'block',
-              type: 'paragraph',
-              paragraph: { rich_text: [{ type: 'text', text: { content: pText.slice(0, 2000) } }] }
-            });
-          }
+           blocks.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: { rich_text: [{ type: 'text', text: { content: pText.slice(0, 2000) } }] }
+          });
         }
         break;
     }
   }
   
-  // If no blocks were created, fall back to plain text
   if (blocks.length === 0) {
     return createTextBlocks(plainText);
   }
@@ -359,13 +279,15 @@ function extractListItems(listHtml) {
   return items;
 }
 
-// Strip HTML tags
+// Strip HTML tags but preserve newlines better
 function stripHtml(html) {
   return decodeHtmlEntities(
     html
       .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
+      .replace(/<\/p>/gi, '\n') // End of paragraph is a newline
+      .replace(/<\/div>/gi, '\n') // End of div is a newline
+      .replace(/<[^>]+>/g, '') // Strip other tags
+      .replace(/[ \t]+/g, ' ') // Collapse multiple spaces/tabs to single space, but NOT newlines
       .trim()
   );
 }
@@ -397,13 +319,20 @@ async function appendContent(token, pageId, text, sourceUrl, html) {
   const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
   
   // Build header blocks
-  const headerBlocks = [
-    {
-      object: 'block',
-      type: 'divider',
-      divider: {}
-    }
-  ];
+  const headerBlocks = [];
+  
+  // Add a spacer block (empty paragraph) before the divider to separate from previous content
+  headerBlocks.push({
+    object: 'block',
+    type: 'paragraph',
+    paragraph: { rich_text: [] } // Empty text block acts as spacer
+  });
+  
+  headerBlocks.push({
+    object: 'block',
+    type: 'divider',
+    divider: {}
+  });
   
   // Only add source line if different URL
   if (!isSameSource) {
@@ -415,7 +344,7 @@ async function appendContent(token, pageId, text, sourceUrl, html) {
           { 
             type: 'text', 
             text: { content: 'source' },
-            annotations: { code: true }
+            annotations: { code: true, color: 'red' } // Attempt to style, though color support via API is limited in rich_text annotations directly without specific color param, usually 'code' is enough for the look user wants. Actually Notion API 'annotations' object supports 'color'.
           },
           { type: 'text', text: { content: ' : ' } },
           { type: 'text', text: { content: sourceUrl, link: { url: sourceUrl } } }
