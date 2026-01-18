@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notion Clipper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>📋 Notion Clipper</h1>
+    </header>
+
+    <div class="content-preview" id="preview">
+      <p class="placeholder">Select text on the page first</p>
+    </div>
+
+    <div class="form-group">
+      <label for="path">Save to path:</label>
+      <div class="path-input-row">
+        <input type="text" id="path" placeholder="e.g., Projects/Notes/Today">
+        <button id="clearPathBtn" class="clear-btn" title="Reset to default path">✕</button>
+      </div>
+      <p class="hint">Leave empty for: <span id="defaultPath"></span></p>
+    </div>
+
+    <div class="form-group checkbox-group">
+      <label>
+        <input type="checkbox" id="autoCreate" checked>
+        Auto-create missing pages
+      </label>
+    </div>
+
+    <button id="saveBtn" class="save-btn" disabled>
+      <span class="btn-text">Save to Notion</span>
+      <span class="btn-loading" hidden>Saving...</span>
+    </button>
+
+    <div id="status" class="status"></div>
+
+    <footer>
+      <a href="#" id="openOptions">⚙️ Settings</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
