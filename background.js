@@ -132,6 +132,7 @@ function htmlToNotionBlocks(html, plainText) {
     { regex: /<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, type: 'quote' },
     { regex: /<ul[^>]*>([\s\S]*?)<\/ul>/gi, type: 'ul' },
     { regex: /<ol[^>]*>([\s\S]*?)<\/ol>/gi, type: 'ol' },
+    { regex: /<table[^>]*>([\s\S]*?)<\/table>/gi, type: 'table' }, // Table support
     { regex: /<p[^>]*>([\s\S]*?)<\/p>/gi, type: 'p' },
     { regex: /<div[^>]*>([\s\S]*?)<\/div>/gi, type: 'div' },
     { regex: /<li[^>]*>([\s\S]*?)<\/li>/gi, type: 'li' },
@@ -212,6 +213,52 @@ function htmlToNotionBlocks(html, plainText) {
         }
         break;
         
+      case 'table':
+        const tableHtml = match[1];
+        // Parse rows
+        const rows = [];
+        const trRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+        let trMatch;
+        let maxCols = 0;
+        
+        while ((trMatch = trRegex.exec(tableHtml)) !== null) {
+          const cellContent = trMatch[1];
+          const cells = [];
+          const tdRegex = /<(?:td|th)[^>]*>([\s\S]*?)<\/(?:td|th)>/gi;
+          let tdMatch;
+          while ((tdMatch = tdRegex.exec(cellContent)) !== null) {
+            cells.push(stripHtml(tdMatch[1]).slice(0, 2000));
+          }
+          if (cells.length > 0) {
+            rows.push(cells);
+            maxCols = Math.max(maxCols, cells.length);
+          }
+        }
+        
+        if (rows.length > 0) {
+          blocks.push({
+            object: 'block',
+            type: 'table',
+            table: {
+              table_width: maxCols,
+              has_column_header: tableHtml.includes('<th'),
+              has_row_header: false,
+              children: rows.map(row => {
+                // Pad row if needed
+                while (row.length < maxCols) row.push("");
+                
+                return {
+                  type: 'table_row',
+                  table_row: {
+                    cells: row.map(cellText => [{ type: 'text', text: { content: cellText } }])
+                  }
+                };
+              })
+            }
+          });
+        }
+        break;
+        
       case 'li':
         const liText = stripHtml(match[1]);
         if (liText.trim()) {
@@ -279,7 +326,7 @@ function extractListItems(listHtml) {
   return items;
 }
 
-// Strip HTML tags but preserve newlines better
+// Strip HTML tags but preserve newlines and indentation better
 function stripHtml(html) {
   return decodeHtmlEntities(
     html
@@ -287,7 +334,7 @@ function stripHtml(html) {
       .replace(/<\/p>/gi, '\n') // End of paragraph is a newline
       .replace(/<\/div>/gi, '\n') // End of div is a newline
       .replace(/<[^>]+>/g, '') // Strip other tags
-      .replace(/[ \t]+/g, ' ') // Collapse multiple spaces/tabs to single space, but NOT newlines
+      // Removed the space collapsing regex to preserve indentation
       .trim()
   );
 }
