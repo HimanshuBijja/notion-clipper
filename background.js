@@ -517,7 +517,7 @@ async function handleSaveToNotion({ text, html, url, path, autoCreate }) {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'saveToNotion',
-    title: '📋 Save to Notion',
+    title: 'Save to Notion',
     contexts: ['selection']
   });
 });
